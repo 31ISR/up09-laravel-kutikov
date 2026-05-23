@@ -12,17 +12,13 @@ return new class extends Migration {
     {
         Schema::create('tasks', function (Blueprint $table) {
             $table->id();
-            // title -> строка
-            // description -> текст
-            // status -> выбор из готовых вариантов (pending, in_progress, done)
-            // станлартное значение 'pending'
-            // priority -> выбор из готовых вариантов (low, medium, high)
-            // станлартное значение 'medium'
-            // due_date -> дата, значение может отсутствовать 
-            // user_id -> айдишка юзера, привязанная к другой таблице,
-            // задача удаляется при удалении юзера
-            // category_id -> айдишка юзера, привязанная к другой таблице, может отсутсвовать
-            // категория обнуляется при удалении юзера
+            $table->string('title');
+            $table->text('description');
+            $table->enum('status', ['pending', 'in_progress', 'done'])->default('pending');
+            $table->enum('priority', ['low', 'medium', 'high'])->default('medium');
+            $table->date('due_date')->nullable();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('category_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }
