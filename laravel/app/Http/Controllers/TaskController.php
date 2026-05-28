@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -18,15 +19,24 @@ class TaskController extends Controller
         return view('tasks.index', compact('tasks'));
     }
 
-    public function store()
+    public function store(Request $request)
     {
-        // валидируйте
-        // title - обязательное, строка, максимум 255 символов
-        // description - необязательное, строка
-        // status - обязательное, присутствует в enum 'pending','in_progress', 'done
-        // priority - обязательное, присутствует в enum 'low, medium, high'
-        // due_date - необязательное, дата, допустимое значение - сегодня и позже
-        // category_id - необязательное, существует id в таблице категорий
+        $data = $request->validate([
+            "title" => "required|string|max:255",
+            "description" => "nullable|string",
+            "status" => "required|in:pending,in_progress,done",
+            "priority" => "required|in:low,medium,high",
+            "due_date" => "nullable|date|after_or_equal:now",
+            "category_id" => "nullable|exists:categories,id"
+        ]);
+
+        /**
+         * @var User $user
+         */
+        $user = Auth::user();
+        $user->tasks()->create($data);
+
+        return redirect()->route('tasks.index')->with('success', 'Задача создана');
     }
 
     public function create()
@@ -36,18 +46,52 @@ class TaskController extends Controller
         return view('tasks.create', compact('categories'));
     }
 
-    public function edit()
+    public function edit(Request $request, Task $task)
     {
+        $this->authorize('update', $task);
 
+        $user = Auth::user();
+        $categories = $user->categories()->get();
+        return view('tasks.edit', compact('task', 'categories'));
     }
 
-    public function update()
+    public function update(Request $request, Task $task)
     {
+        $this->authorize('update', $task);
 
+        $data = $request->validate([
+            "title" => "required|string|max:255",
+            "description" => "nullable|string",
+            "status" => "required|in:pending,in_progress,done",
+            "priority" => "required|in:low,medium,high",
+            "due_date" => "nullable|date|after_or_equal:now",
+            "category_id" => "nullable|exists:categories,id"
+        ]);
+        
+        $task->update($data);
+        
+        return redirect()->route("tasks.index")->with("success","Задача обновлена");
     }
 
-    public function destroy()
+    public function destroy(Task $task)
     {
+        $this->authorize('delete', $task);
+        $task->delete();
 
+        return redirect()->route('tasks.index')->with('success', 'Задача удалена');
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

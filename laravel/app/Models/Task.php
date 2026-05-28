@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Task extends Model
 {
     protected $fillable = [
-        'name',
+        'title',
         'description',
         'status',
         'priority',
@@ -15,7 +15,7 @@ class Task extends Model
         'user_id',
         'category_id'
     ];
-    
+
     protected $casts = [
         'due_date' => 'date'
     ];
