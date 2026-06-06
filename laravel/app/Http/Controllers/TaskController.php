@@ -67,9 +67,9 @@ class TaskController extends Controller
             "due_date" => "nullable|date|after_or_equal:now",
             "category_id" => "nullable|exists:categories,id"
         ]);
-        
+
         $task->update($data);
-        
+
         return redirect()->route("tasks.index")->with("success","Задача обновлена");
     }
 
